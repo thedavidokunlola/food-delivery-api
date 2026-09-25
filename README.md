@@ -2,7 +2,7 @@
 
 A public REST API for a Lagos-based food delivery marketplace. Browse restaurants, explore menus, place orders, and track delivery status — all through a clean, versioned API.
 
-> **Base URL:** `https://your-app.railway.app/api/v1`
+> **Base URL:** `https://food-delivery-api-production-b47b.up.railway.app/api/v1`
 >
 > **No authentication required** for any endpoint. This API is open for reading by anyone on the internet.
 
@@ -189,7 +189,7 @@ GET /api/v1/restaurants
 **Example:**
 
 ```bash
-curl "https://your-app.railway.app/api/v1/restaurants?cuisine=Nigerian&isOpen=true&sort=rating&order=desc&limit=5"
+curl "https://food-delivery-api-production-b47b.up.railway.app/api/v1/restaurants?cuisine=Nigerian&isOpen=true&sort=rating&order=desc&limit=5"
 ```
 
 **Response:**
@@ -231,7 +231,7 @@ GET /api/v1/restaurants/:id
 **Example:**
 
 ```bash
-curl "https://your-app.railway.app/api/v1/restaurants/clx1abc123"
+curl "https://food-delivery-api-production-b47b.up.railway.app/api/v1/restaurants/clx1abc123"
 ```
 
 **Response:**
@@ -287,7 +287,7 @@ GET /api/v1/restaurants/:id/menu
 **Example:**
 
 ```bash
-curl "https://your-app.railway.app/api/v1/restaurants/clx1abc123/menu?category=Mains&isAvailable=true&sort=price&order=asc"
+curl "https://food-delivery-api-production-b47b.up.railway.app/api/v1/restaurants/clx1abc123/menu?category=Mains&isAvailable=true&sort=price&order=asc"
 ```
 
 **Response:**
@@ -344,7 +344,7 @@ GET /api/v1/menu-items
 **Example:**
 
 ```bash
-curl "https://your-app.railway.app/api/v1/menu-items?category=Mains&minPrice=200000&maxPrice=1000000&sort=price&order=asc&limit=10"
+curl "https://food-delivery-api-production-b47b.up.railway.app/api/v1/menu-items?category=Mains&minPrice=200000&maxPrice=1000000&sort=price&order=asc&limit=10"
 ```
 
 **Response:**
@@ -390,7 +390,7 @@ GET /api/v1/menu-items/:id
 **Example:**
 
 ```bash
-curl "https://your-app.railway.app/api/v1/menu-items/clx2def456"
+curl "https://food-delivery-api-production-b47b.up.railway.app/api/v1/menu-items/clx2def456"
 ```
 
 ---
@@ -417,7 +417,7 @@ GET /api/v1/orders
 **Example:**
 
 ```bash
-curl "https://your-app.railway.app/api/v1/orders?status=pending&sort=createdAt&order=desc&limit=5"
+curl "https://food-delivery-api-production-b47b.up.railway.app/api/v1/orders?status=pending&sort=createdAt&order=desc&limit=5"
 ```
 
 **Response:**
@@ -478,7 +478,7 @@ Returns the order with all its order items included.
 **Example:**
 
 ```bash
-curl "https://your-app.railway.app/api/v1/orders/clx3ghi789"
+curl "https://food-delivery-api-production-b47b.up.railway.app/api/v1/orders/clx3ghi789"
 ```
 
 ---
@@ -525,7 +525,7 @@ POST /api/v1/orders
 **Example:**
 
 ```bash
-curl -X POST "https://your-app.railway.app/api/v1/orders" \
+curl -X POST "https://food-delivery-api-production-b47b.up.railway.app/api/v1/orders" \
   -H "Content-Type: application/json" \
   -d '{
     "restaurantId": "clx1abc123",
@@ -559,7 +559,7 @@ curl -X POST "https://your-app.railway.app/api/v1/orders" \
 **Error (422 — missing field):**
 
 ```bash
-curl -X POST "https://your-app.railway.app/api/v1/orders" \
+curl -X POST "https://food-delivery-api-production-b47b.up.railway.app/api/v1/orders" \
   -H "Content-Type: application/json" \
   -d '{ "restaurantId": "clx1abc123" }'
 ```
@@ -609,7 +609,7 @@ Valid status transitions:
 **Example:**
 
 ```bash
-curl -X PATCH "https://your-app.railway.app/api/v1/orders/clx3ghi789" \
+curl -X PATCH "https://food-delivery-api-production-b47b.up.railway.app/api/v1/orders/clx3ghi789" \
   -H "Content-Type: application/json" \
   -d '{ "status": "confirmed" }'
 ```
@@ -638,7 +638,7 @@ Only allowed if the order status is `pending` or `confirmed`. Sets the status to
 **Example:**
 
 ```bash
-curl -X DELETE "https://your-app.railway.app/api/v1/orders/clx3ghi789"
+curl -X DELETE "https://food-delivery-api-production-b47b.up.railway.app/api/v1/orders/clx3ghi789"
 ```
 
 **Response (200):**
@@ -727,7 +727,7 @@ This consistency means API consumers always know where to find the data, paginat
 
 ### Live URL
 
-> 🔗 **`https://your-app.railway.app`**
+> 🔗 **`https://food-delivery-api-production-b47b.up.railway.app`**
 
 Replace with your actual Railway deployment URL after deploying.
 
