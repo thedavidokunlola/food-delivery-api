@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lagos Food Delivery — Restaurant Browser</title>
+  <meta name="description" content="Browse Lagos restaurants, filter by cuisine, and explore menus from the Food Delivery Market API">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0f1117;
+      --bg-card: #1a1d27;
+      --bg-card-hover: #22263a;
+      --text-primary: #f0f0f5;
+      --text-secondary: #8b8fa3;
+      --accent: #22c55e;
+      --accent-dim: #16a34a;
+      --accent-glow: rgba(34, 197, 94, 0.15);
+      --border: #2a2d3a;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0f1117 0%, #1a1d27 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      font-size: 32px;
+    }
+
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent) 0%, #4ade80 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .api-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .api-badge .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    select, input[type="number"] {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+
+    select:hover, input[type="number"]:hover {
+      border-color: var(--accent);
+    }
+
+    select:focus, input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .stats-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .stats-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .stats-text strong {
+      color: var(--text-primary);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: all 0.25s ease;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #4ade80);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .card-name {
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .card-status {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .status-open {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+    }
+
+    .status-closed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .card-cuisine {
+      display: inline-block;
+      padding: 3px 10px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .card-address {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .card-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .meta-item {
+      text-align: center;
+    }
+
+    .meta-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .meta-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .star {
+      color: var(--warning);
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 32px 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-banner {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 24px 0;
+      color: #f87171;
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-content">
+      <div class="logo">
+        <span class="logo-icon">🍔</span>
+        <div>
+          <h1>Lagos Food Market</h1>
+          <p>Browse restaurants from the API</p>
+        </div>
+      </div>
+      <div class="api-badge">
+        <span class="dot"></span>
+        <span id="api-status">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="controls">
+      <div class="filter-group">
+        <label for="cuisine-filter">Cuisine:</label>
+        <select id="cuisine-filter">
+          <option value="">All Cuisines</option>
+          <option value="Nigerian">Nigerian</option>
+          <option value="Shawarma">Shawarma</option>
+          <option value="Pizza">Pizza</option>
+          <option value="Chinese">Chinese</option>
+          <option value="Continental">Continental</option>
+          <option value="Fast Food">Fast Food</option>
+          <option value="Seafood">Seafood</option>
+          <option value="Grills">Grills</option>
+          <option value="Pastries">Pastries</option>
+          <option value="Healthy">Healthy</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="open-filter">Status:</label>
+        <select id="open-filter">
+          <option value="">All</option>
+          <option value="true">Open Now</option>
+          <option value="false">Closed</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="sort-filter">Sort by:</label>
+        <select id="sort-filter">
+          <option value="name">Name</option>
+          <option value="rating">Rating</option>
+          <option value="deliveryTime">Delivery Time</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="order-filter">Order:</label>
+        <select id="order-filter">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <span class="stats-text" id="stats-text">Loading restaurants...</span>
+    </div>
+
+    <div id="content">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Fetching restaurants from the API...</p>
+      </div>
+    </div>
+
+    <div class="pagination" id="pagination" style="display: none;">
+      <button class="btn" id="prev-btn" disabled>← Previous</button>
+      <span class="page-info" id="page-info">Page 1</span>
+      <button class="btn" id="next-btn">Next →</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>Powered by the <a href="#" id="api-link">Lagos Food Delivery API</a> · All prices in Nigerian Naira (₦)</p>
+  </footer>
+
+  <script>
+    // ============================================================
+    // Configuration — UPDATE THIS URL after deploying to Railway
+    // ============================================================
+    const API_BASE_URL = 'https://your-app.railway.app/api/v1';
+    // For local development, uncomment the line below:
+    // const API_BASE_URL = 'http://localhost:3000/api/v1';
+
+    const ITEMS_PER_PAGE = 12;
+
+    let currentOffset = 0;
+    let totalCount = 0;
+
+    // Format kobo amount to Naira display string
+    function formatPrice(kobo) {
+      return '₦' + (kobo / 100).toLocaleString('en-NG', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      });
+    }
+
+    // Render star rating as visual stars
+    function renderStars(rating) {
+      const full = Math.floor(rating);
+      const half = rating % 1 >= 0.5 ? 1 : 0;
+      const empty = 5 - full - half;
+      return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+    }
+
+    // Build a single restaurant card HTML
+    function createCard(restaurant) {
+      return `
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-name">${restaurant.name}</h3>
+            <span class="card-status ${restaurant.isOpen ? 'status-open' : 'status-closed'}">
+              ${restaurant.isOpen ? 'Open' : 'Closed'}
+            </span>
+          </div>
+          <span class="card-cuisine">${restaurant.cuisine}</span>
+          <p class="card-address">📍 ${restaurant.address}</p>
+          <div class="card-meta">
+            <div class="meta-item">
+              <div class="meta-value star">${renderStars(restaurant.rating)} ${restaurant.rating}</div>
+              <div class="meta-label">Rating</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-value">${restaurant.deliveryTime} min</div>
+              <div class="meta-label">Delivery</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-value">${formatPrice(restaurant.minimumOrder)}</div>
+              <div class="meta-label">Min Order</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Fetch restaurants from the deployed API
+    async function fetchRestaurants() {
+      const content = document.getElementById('content');
+      content.innerHTML = '<div class="loading"><div class="spinner"></div><p>Fetching restaurants...</p></div>';
+
+      const cuisine = document.getElementById('cuisine-filter').value;
+      const isOpen = document.getElementById('open-filter').value;
+      const sort = document.getElementById('sort-filter').value;
+      const order = document.getElementById('order-filter').value;
+
+      // Build query string from active filters
+      const params = new URLSearchParams();
+      params.set('limit', ITEMS_PER_PAGE);
+      params.set('offset', currentOffset);
+      if (cuisine) params.set('cuisine', cuisine);
+      if (isOpen) params.set('isOpen', isOpen);
+      params.set('sort', sort);
+      params.set('order', order);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/restaurants?${params}`);
+        const json = await response.json();
+
+        if (!response.ok) {
+          throw new Error(json.error?.message || 'API request failed');
+        }
+
+        const { data, meta } = json;
+        totalCount = meta.total;
+
+        // Update API status badge
+        document.getElementById('api-status').textContent = 'API Connected';
+
+        // Update stats bar
+        const start = meta.offset + 1;
+        const end = Math.min(meta.offset + meta.limit, meta.total);
+        document.getElementById('stats-text').innerHTML =
+          `Showing <strong>${start}–${end}</strong> of <strong>${meta.total}</strong> restaurants`;
+
+        // Render restaurant cards
+        if (data.length === 0) {
+          content.innerHTML = '<div class="loading"><p>No restaurants found matching your filters.</p></div>';
+        } else {
+          content.innerHTML = '<div class="grid">' + data.map(createCard).join('') + '</div>';
+        }
+
+        // Update pagination controls
+        const pagination = document.getElementById('pagination');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageInfo = document.getElementById('page-info');
+
+        pagination.style.display = 'flex';
+        prevBtn.disabled = currentOffset === 0;
+        nextBtn.disabled = !meta.hasMore;
+
+        const currentPage = Math.floor(currentOffset / ITEMS_PER_PAGE) + 1;
+        const totalPages = Math.ceil(meta.total / ITEMS_PER_PAGE);
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+      } catch (err) {
+        content.innerHTML = `<div class="error-banner">❌ Failed to fetch restaurants: ${err.message}<br><small>Make sure the API_BASE_URL is set correctly in the script.</small></div>`;
+        document.getElementById('api-status').textContent = 'Connection Failed';
+      }
+    }
+
+    // Event listeners for filters — reset to page 1 when filters change
+    document.getElementById('cuisine-filter').addEventListener('change', () => { currentOffset = 0; fetchRestaurants(); });
+    document.getElementById('open-filter').addEventListener('change', () => { currentOffset = 0; fetchRestaurants(); });
+    document.getElementById('sort-filter').addEventListener('change', () => { currentOffset = 0; fetchRestaurants(); });
+    document.getElementById('order-filter').addEventListener('change', () => { currentOffset = 0; fetchRestaurants(); });
+
+    // Pagination button handlers
+    document.getElementById('prev-btn').addEventListener('click', () => {
+      if (currentOffset >= ITEMS_PER_PAGE) {
+        currentOffset -= ITEMS_PER_PAGE;
+        fetchRestaurants();
+      }
+    });
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+      if (currentOffset + ITEMS_PER_PAGE < totalCount) {
+        currentOffset += ITEMS_PER_PAGE;
+        fetchRestaurants();
+      }
+    });
+
+    // Set the API link in the footer
+    document.getElementById('api-link').href = API_BASE_URL.replace('/api/v1', '');
+
+    // Fetch on page load
+    fetchRestaurants();
+  </script>
+</body>
+</html>

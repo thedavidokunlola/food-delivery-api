@@ -1,0 +1,43 @@
+{
+  "name": "food-market-api",
+  "version": "1.0.0",
+  "description": "Lagos Food Delivery Market REST API",
+  "main": "dist/src/server.js",
+  "scripts": {
+    "dev": "ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/src/server.js",
+    "seed": "npx prisma db seed",
+    "generate": "npx prisma generate",
+    "migrate": "npx prisma db push"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "keywords": [
+    "food-delivery",
+    "lagos",
+    "api",
+    "rest"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@prisma/client": "5.22.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.2",
+    "prisma": "5.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,84 @@
+// Prisma schema for Lagos Food Delivery Market API
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id           String     @id @default(cuid())
+  name         String
+  cuisine      String
+  address      String
+  rating       Float      @default(0)
+  isOpen       Boolean    @default(true)
+  deliveryTime Int
+  minimumOrder Int
+  currency     String     @default("NGN")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  menuItems    MenuItem[]
+  orders       Order[]
+
+  @@index([cuisine])
+  @@index([rating])
+  @@index([isOpen])
+}
+
+model MenuItem {
+  id           String      @id @default(cuid())
+  restaurantId String
+  name         String
+  description  String
+  price        Int
+  currency     String      @default("NGN")
+  category     String
+  isAvailable  Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems   OrderItem[]
+
+  @@index([restaurantId])
+  @@index([category])
+  @@index([price])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  restaurantId    String
+  customerName    String
+  customerPhone   String
+  deliveryAddress String
+  status          String      @default("pending")
+  totalAmount     Int
+  currency        String      @default("NGN")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  restaurant      Restaurant  @relation(fields: [restaurantId], references: [id])
+  orderItems      OrderItem[]
+
+  @@index([restaurantId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  menuItemId String
+  quantity   Int
+  unitPrice  Int
+  subtotal   Int
+  currency   String   @default("NGN")
+  createdAt  DateTime @default(now())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([orderId])
+  @@index([menuItemId])
+}
